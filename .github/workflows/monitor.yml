@@ -8,13 +8,27 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
       - uses: actions/checkout@v3
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+
       - name: Install dependencies
         run: pip install requests beautifulsoup4
+
       - name: Run monitor
         run: python goethe_monitor.py
+
+      - name: Save snapshot if changed
+        run: |
+          git config user.name "GoetheMonitor"
+          git config user.email "monitor@github.com"
+          git add last_snapshot.txt || true
+          git diff --cached --quiet || git commit -m "Update page snapshot"
+          git push || true
